@@ -1,4 +1,4 @@
-from services.coingecko import buscar_dados_mercado
+import pandas as pd
 
 # Constantes para Intensidade da Variação 
 QUEDA_ACENTUADA = -10
@@ -10,7 +10,7 @@ ALTA_FORTE = 10
 BIG_CAP = 1e10
 SMALL_CAP = 2e10
 
-def processar_dados_mercado(df_mercado, df_historico):
+def processar_dados_mercado(df_mercado: pd.DataFrame, df_historico: pd.DataFrame):
     # Aqui, serão calculadas métricas úteis para traders com base nas informações gerais sobre cada moeda, que serão exibidas em cards no dashboard
     
     # Distância até o ATH
@@ -29,7 +29,7 @@ def processar_dados_mercado(df_mercado, df_historico):
         else 'Small Cap'
         ))
     
-    # Intensidade da Variação
+    # Intensidade da Variação Diária
     df_mercado["change_level"] = df_mercado["change_24h"].apply(
         lambda variacao:
             "Queda Acentuada" if variacao <= QUEDA_ACENTUADA else

@@ -60,7 +60,9 @@ def buscar_moedas():
     return df
 
 def buscar_historico_moeda(id_moeda: str, dias: int):
-    url = f'{BASE_URL}/coins/{id_moeda}/market_chart?vs_currency=usd&days={dias}'
+    interval = 'daily'
+    
+    url = f'{BASE_URL}/coins/{id_moeda}/market_chart?vs_currency=usd&days={dias}&interval={interval}'
     
     df = buscar_dados_da_api(url)
     
@@ -93,6 +95,9 @@ def buscar_historico_moeda(id_moeda: str, dias: int):
     df = df.sort_values("date")
     
     df = df[['date', 'prices', 'market_cap', 'volume']]
+    
+    df['date'] = df['date'].dt.date
+    df = df.drop_duplicates('date', keep='last')
     
     return df
 
@@ -131,12 +136,13 @@ def buscar_dados_mercado(ids_moedas: list[str]):
     
     return df
 
-# bitcoin = buscar_historico_moeda('bitcoin', 1)
+bitcoin = buscar_historico_moeda('bitcoin', 365)
+print(bitcoin)
 
 # moedas = buscar_moedas()
 
 # bitcoin_candles = buscar_candles_moeda('bitcoin', 1)
 # print(bitcoin_candles)
 
-dados_mercado = buscar_dados_mercado(['bitcoin', 'ethereum'])
-print(dados_mercado)
+# dados_mercado = buscar_dados_mercado(['bitcoin', 'ethereum'])
+# print(dados_mercado.isna().sum())
