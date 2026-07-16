@@ -1,4 +1,7 @@
 import pandas as pd
+import numpy as np
+
+JANELAS = [7, 30, 90]
 
 def processar_historico(df_historico: pd.DataFrame):
     # Aqui serão calculadas métricas relacionadas ao histórico de preço das moedas
@@ -6,10 +9,36 @@ def processar_historico(df_historico: pd.DataFrame):
     # Retorno Diário
     df_historico["daily_return"] = df_historico["price"].pct_change() * 100
     
-    # Retorno Acumulado
+    # Retorno Acumulado ao longo do tempo
     preco_inicial = df_historico['price'].iloc[0]
-    preco_atual = df_historico['price'].iloc[-1]
-    df_historico['all_time_return'] = ((preco_atual - preco_inicial) / preco_inicial) * 100
+    df_historico['cumulative_return'] = ((df_historico['price'] - preco_inicial) / preco_inicial) * 100
     
-    # Médias Móveis
+    for janela in JANELAS:
+        # Média Móvel
+        df_historico[f'ma{janela}'] = df_historico['price'].rolling(window=janela).mean()
+        
+        # Volatilidade
+        df_historico[f'volatility_{janela}'] = df_historico['daily_return'].rolling(window=janela).std()
+        
+        # Distância da Média Móvel
+        df_historico[f'distance_ma{janela}'] = (df_historico['price'] - df_historico[f'ma{janela}']) / df_historico[f'ma{janela}'] * 100
+        
+        # Volume Médio
+        df_historico[f'avg_volume_{janela}'] = df_historico['volume'].rolling(window=janela).mean()
+        
+        # Volume Relativo
+        df_historico[f'relative_volume_{janela}'] = df_historico['volume'] / df_historico[f'avg_volume_{janela}']
+        
+    # Drawdown
+    maior_preco_historico = df_historico['price'].cummax()
+    df_historico['drawdown'] = (df_historico['price'] - maior_preco_historico) / maior_preco_historico * 100
     
+    # Tendência de Preço (usando a hierarquia das médias móveis)
+    condicoes_tendencia = [
+        (df_historico['price'] > df_historico['ma7'] > df_historico['ma30'] > df_historico['ma90']),
+        (df_historico['price'] > df_historico['ma30'] and df_historico['ma30'] > df_historico['ma90']),
+        (df_historico['price'] < df_historico['ma7'] < df_historico['ma30'] < df_historico['ma90']),
+        (df_historico['price'] < df_historico['ma30'] and df_historico['ma30'] < df_historico['ma90'])
+    ]
+    escolhas_tendencia = ['Forte Alta', 'Alta', 'Forte Baixa', 'Baixa']
+    df_historico['price_trend'] = np.select(condicoes_tendencia, escolhas_tendencia, default='Consolidação')

@@ -11,3 +11,7 @@ principais_moedas = {
     "binancecoin": "BNB",
     "cardano": "Cardano"
 }
+
+# preco_inicial = df_historico['price'].iloc[0]
+#     preco_atual = df_historico['price'].iloc[-1]
+#     retorno_acumulado = ((preco_atual - preco_inicial) / preco_inicial) * 100
