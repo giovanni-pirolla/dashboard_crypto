@@ -20,4 +20,8 @@ def processar_historico(df_historico: pd.DataFrame):
         # Volatilidade
         df_historico[f'volatility_{janela}'] = df_historico['daily_return'].rolling(window=janela).std()
         
+        # Volume Médio
+        df_historico[f'avg_volume_{janela}'] = df_historico['volume'].rolling(window=janela).mean()
         
+        # Volume Relativo
+        df_historico[f'relative_volume_{janela}'] = df_historico['volume'] / df_historico[f'avg_volume_{janela}']
