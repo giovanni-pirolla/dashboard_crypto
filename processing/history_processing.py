@@ -25,3 +25,8 @@ def processar_historico(df_historico: pd.DataFrame):
         
         # Volume Relativo
         df_historico[f'relative_volume_{janela}'] = df_historico['volume'] / df_historico[f'avg_volume_{janela}']
+        
+        # Drawdown
+        maior_preco_historico = df_historico['price'].cummax()
+        df_historico['drawdown'] = (df_historico['price'] - maior_preco_historico) / maior_preco_historico * 100
+     
