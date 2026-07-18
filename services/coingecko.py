@@ -1,6 +1,7 @@
 import requests
 import pandas as pd  
 import datetime as dt
+import streamlit as st
 
 BASE_URL = 'https://api.coingecko.com/api/v3'
 
@@ -47,26 +48,36 @@ def buscar_dados_da_api(url: str):
         
         print('Sucesso')
         return pd.DataFrame(response.json())
-    except Exception as e:
-        print(f'Erro de Conexão com a API: {e}')
-        return pd.DataFrame()
-        
+    
+    except requests.HTTPError as e:
+        print(f"Erro HTTP: {e}")
+        return None
 
+    except requests.RequestException as e:
+        print(f"Erro de conexão: {e}")
+        return None
+        
+@st.cache_data(ttl=86400)
 def buscar_moedas():
     url = f"{BASE_URL}/coins/list"
 
-    df = buscar_dados_da_api(url)
+    df = pd.DataFrame(buscar_dados_da_api(url))
+    if df is None:
+        return pd.DataFrame()
     
     return df
 
+@st.cache_data(ttl=300)
 def buscar_historico_moeda(id_moeda: str, dias: int):
     interval = 'daily'
     
     url = f'{BASE_URL}/coins/{id_moeda}/market_chart?vs_currency=usd&days={dias}&interval={interval}'
     
     df = buscar_dados_da_api(url)
+    if df is None:
+        return pd.DataFrame()
     
-    for col in df.columns:
+    for col in ["prices","market_caps","total_volumes"]:
         df[[f'timestamp_{col}', col]] = pd.DataFrame(
             df[col].to_list(),
             index=df.index
@@ -86,6 +97,7 @@ def buscar_historico_moeda(id_moeda: str, dias: int):
     
     df = df.rename(
         columns={
+            'prices' : 'price',
             'timestamp_prices' : 'date',
             'total_volumes' : 'volume',
             'market_caps' : 'market_cap'
@@ -94,33 +106,41 @@ def buscar_historico_moeda(id_moeda: str, dias: int):
     
     df = df.sort_values("date")
     
-    df = df[['date', 'prices', 'market_cap', 'volume']]
-    
     df['date'] = df['date'].dt.date
     df = df.drop_duplicates('date', keep='last')
     
     return df
 
+@st.cache_data(ttl=300)
 def buscar_candles_moeda(id_moeda: str, dias: int):
     url = f'{BASE_URL}/coins/{id_moeda}/ohlc?vs_currency=usd&days={dias}'
     
     df = buscar_dados_da_api(url)
-    
-    df.columns = [
-        "date",
-        "open",
-        "high",
-        "low",
-        "close"
-    ]
+    df = df.rename(
+        columns={
+            0: 'date',
+            1: 'open',
+            2: 'high',
+            3: 'low',
+            4: 'close'
+        }
+    )
+    if df is None:
+        return pd.DataFrame()
     
     df['date'] = pd.to_datetime(
         df['date'],
         unit='ms'
     )
     
+    df["direction"] = df.apply(
+        lambda row: "▲ Alta" if row["close"] >= row["open"] else "▼ Baixa",
+        axis=1
+    )
+    
     return df
 
+@st.cache_data(ttl=60)
 def buscar_dados_mercado(ids_moedas: list[str]):
     if not ids_moedas:
         print('Lista de moedas inválida')
@@ -130,19 +150,10 @@ def buscar_dados_mercado(ids_moedas: list[str]):
     url = f'{BASE_URL}/coins/markets?vs_currency=usd&ids={ids}'
     
     df = buscar_dados_da_api(url)
+    if df is None:
+        return pd.DataFrame()
     
     df = df[COLUNAS_MERCADO]
     df = df.rename(columns=RENOMEAR_COLUNAS_MERCADO)
     
     return df
-
-bitcoin = buscar_historico_moeda('bitcoin', 365)
-print(bitcoin)
-
-# moedas = buscar_moedas()
-
-# bitcoin_candles = buscar_candles_moeda('bitcoin', 1)
-# print(bitcoin_candles)
-
-# dados_mercado = buscar_dados_mercado(['bitcoin', 'ethereum'])
-# print(dados_mercado.isna().sum())

@@ -39,3 +39,4 @@ def processar_dados_mercado(df_mercado: pd.DataFrame, df_historico: pd.DataFrame
             "Alta Forte"
     )
     
+    return df_mercado

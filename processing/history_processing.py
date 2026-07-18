@@ -30,12 +30,15 @@ def processar_historico(df_historico: pd.DataFrame):
         maior_preco_historico = df_historico['price'].cummax()
         df_historico['drawdown'] = (df_historico['price'] - maior_preco_historico) / maior_preco_historico * 100
      
-        # Tendência de Preço (usando a hierarquia das médias móveis)
+    for janela in JANELAS:
+    # Tendência de Preço (usando a hierarquia das médias móveis)
         condicoes_tendencia = [
-            (df_historico['price'] > df_historico['ma7'] > df_historico['ma30'] > df_historico['ma90']),
-            (df_historico['price'] > df_historico['ma30'] and df_historico['ma30'] > df_historico['ma90']),
-            (df_historico['price'] < df_historico['ma7'] < df_historico['ma30'] < df_historico['ma90']),
-            (df_historico['price'] < df_historico['ma30'] and df_historico['ma30'] < df_historico['ma90'])
+            ((df_historico['price'] > df_historico['ma7']) & (df_historico['ma7'] > df_historico['ma30']) & (df_historico['ma30'] > df_historico['ma90'])),
+            ((df_historico['price'] > df_historico['ma30']) & (df_historico['ma30'] > df_historico['ma90'])),
+            ((df_historico['price'] < df_historico['ma7']) & (df_historico['ma7'] < df_historico['ma30']) & (df_historico['ma30'] < df_historico['ma90'])),
+            ((df_historico['price'] < df_historico['ma30']) & (df_historico['ma30'] < df_historico['ma90']))
         ]
         escolhas_tendencia = ['Forte Alta', 'Alta', 'Forte Baixa', 'Baixa']
         df_historico['price_trend'] = np.select(condicoes_tendencia, escolhas_tendencia, default='Consolidação')
+        
+    return df_historico
