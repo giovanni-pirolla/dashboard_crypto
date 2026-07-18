@@ -133,6 +133,11 @@ def buscar_candles_moeda(id_moeda: str, dias: int):
         unit='ms'
     )
     
+    df["direction"] = df.apply(
+        lambda row: "▲ Alta" if row["close"] >= row["open"] else "▼ Baixa",
+        axis=1
+    )
+    
     return df
 
 @st.cache_data(ttl=60)
