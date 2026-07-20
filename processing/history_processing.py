@@ -3,11 +3,29 @@ import numpy as np
 
 JANELAS = [7, 30, 90]
 
+ESCALAS = [
+    (1_000_000_000_000, "T"),
+    (1_000_000_000, "B"),
+    (1_000_000, "M"),
+    (1_000, "K"),
+]
+
+def formatar_numero(numero):
+    for divisor, sufixo in ESCALAS:
+        if numero >= divisor:
+            return f'{(numero/divisor):,.2f}{sufixo}'
+    
+    return numero
+
 def processar_historico(df_historico: pd.DataFrame):
     # Aqui serão calculadas métricas relacionadas ao histórico de preço das moedas
     
+    if df_historico.empty:
+        print('O DataFrame de histórico está vazio. Nenhum processamento será realizado.')
+        return df_historico
+    
     # Retorno Diário
-    df_historico["daily_return"] = df_historico["price"].pct_change() * 100
+    df_historico['daily_return'] = df_historico['price'].pct_change() * 100
     
     # Retorno Acumulado ao longo do tempo
     preco_inicial = df_historico['price'].iloc[0]
@@ -40,5 +58,10 @@ def processar_historico(df_historico: pd.DataFrame):
         ]
         escolhas_tendencia = ['Forte Alta', 'Alta', 'Forte Baixa', 'Baixa']
         df_historico['price_trend'] = np.select(condicoes_tendencia, escolhas_tendencia, default='Consolidação')
+        
+    df_historico["price_diff"] = df_historico["price"].diff()    
+    
+    # Coluna de Volume Formatada
+    df_historico['formatted_volume'] = df_historico['volume'].apply(formatar_numero)
         
     return df_historico

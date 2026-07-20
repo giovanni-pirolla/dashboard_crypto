@@ -6,7 +6,7 @@ QUEDA_MODERADA = -3
 ALTA_MODERADA = 3
 ALTA_FORTE = 10
 
-# Constantes para Intensidade de Variação
+# Constantes para Faixa de Mercado
 BIG_CAP = 1e10
 SMALL_CAP = 2e10
 
@@ -30,13 +30,13 @@ def processar_dados_mercado(df_mercado: pd.DataFrame, df_historico: pd.DataFrame
         ))
     
     # Intensidade da Variação Diária
-    df_mercado["change_level"] = df_mercado["change_24h"].apply(
+    df_mercado['change_level'] = df_mercado['change_24h'].apply(
         lambda variacao:
-            "Queda Acentuada" if variacao <= QUEDA_ACENTUADA else
-            "Queda Moderada" if variacao <= QUEDA_MODERADA else
-            "Estável" if variacao < ALTA_MODERADA else
-            "Alta Moderada" if variacao < ALTA_FORTE else
-            "Alta Forte"
+            'Queda Acentuada' if variacao <= QUEDA_ACENTUADA else
+            'Queda Moderada' if variacao <= QUEDA_MODERADA else
+            'Estável' if variacao < ALTA_MODERADA else
+            'Alta Moderada' if variacao < ALTA_FORTE else
+            'Alta Forte'
     )
     
     return df_mercado

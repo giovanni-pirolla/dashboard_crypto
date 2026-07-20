@@ -6,38 +6,38 @@ import streamlit as st
 BASE_URL = 'https://api.coingecko.com/api/v3'
 
 COLUNAS_MERCADO = [
-    "id",
-    "symbol",
-    "name",
-    "image",
-    "current_price",
-    "market_cap",
-    "market_cap_rank",
-    "total_volume",
-    "high_24h",
-    "low_24h",
-    "price_change_percentage_24h",
-    "circulating_supply",
-    "total_supply",
-    "max_supply",
-    "ath",
-    "ath_change_percentage",
-    "ath_date",
-    "atl",
-    "atl_change_percentage",
-    "atl_date",
-    "last_updated"
+    'id',
+    'symbol',
+    'name',
+    'image',
+    'current_price',
+    'market_cap',
+    'market_cap_rank',
+    'total_volume',
+    'high_24h',
+    'low_24h',
+    'price_change_percentage_24h',
+    'circulating_supply',
+    'total_supply',
+    'max_supply',
+    'ath',
+    'ath_change_percentage',
+    'ath_date',
+    'atl',
+    'atl_change_percentage',
+    'atl_date',
+    'last_updated'
 ]
 
 RENOMEAR_COLUNAS_MERCADO = {
-    "image": "image_url",
-    "current_price": "price",
-    "market_cap_rank": "rank",
-    "total_volume": "volume",
-    "price_change_percentage_24h": "change_24h",
-    "ath_change_percentage": "ath_change_pct",
-    "atl_change_percentage": "atl_change_pct",
-    "last_updated": "updated_at",
+    'image': 'image_url',
+    'current_price': 'price',
+    'market_cap_rank': 'rank',
+    'total_volume': 'volume',
+    'price_change_percentage_24h': 'change_24h',
+    'ath_change_percentage': 'ath_change_pct',
+    'atl_change_percentage': 'atl_change_pct',
+    'last_updated': 'updated_at',
 }
 
 #função genérica para ser utilizada em todas as requisições
@@ -46,22 +46,21 @@ def buscar_dados_da_api(url: str):
         response = requests.get(url, timeout=10)
         response.raise_for_status()
         
-        print('Sucesso')
         return pd.DataFrame(response.json())
     
     except requests.HTTPError as e:
-        print(f"Erro HTTP: {e}")
+        print(f'Erro HTTP: {e}')
         return None
 
     except requests.RequestException as e:
-        print(f"Erro de conexão: {e}")
+        print(f'Erro de conexão: {e}')
         return None
         
 @st.cache_data(ttl=86400)
 def buscar_moedas():
-    url = f"{BASE_URL}/coins/list"
+    url = f'{BASE_URL}/coins/list'
 
-    df = pd.DataFrame(buscar_dados_da_api(url))
+    df = buscar_dados_da_api(url)
     if df is None:
         return pd.DataFrame()
     
@@ -77,7 +76,7 @@ def buscar_historico_moeda(id_moeda: str, dias: int):
     if df is None:
         return pd.DataFrame()
     
-    for col in ["prices","market_caps","total_volumes"]:
+    for col in ['prices','market_caps','total_volumes']:
         df[[f'timestamp_{col}', col]] = pd.DataFrame(
             df[col].to_list(),
             index=df.index
@@ -104,39 +103,8 @@ def buscar_historico_moeda(id_moeda: str, dias: int):
         }
     )
     
-    df = df.sort_values("date")
-    
     df['date'] = df['date'].dt.date
     df = df.drop_duplicates('date', keep='last')
-    
-    return df
-
-@st.cache_data(ttl=300)
-def buscar_candles_moeda(id_moeda: str, dias: int):
-    url = f'{BASE_URL}/coins/{id_moeda}/ohlc?vs_currency=usd&days={dias}'
-    
-    df = buscar_dados_da_api(url)
-    df = df.rename(
-        columns={
-            0: 'date',
-            1: 'open',
-            2: 'high',
-            3: 'low',
-            4: 'close'
-        }
-    )
-    if df is None:
-        return pd.DataFrame()
-    
-    df['date'] = pd.to_datetime(
-        df['date'],
-        unit='ms'
-    )
-    
-    df["direction"] = df.apply(
-        lambda row: "▲ Alta" if row["close"] >= row["open"] else "▼ Baixa",
-        axis=1
-    )
     
     return df
 
@@ -146,7 +114,7 @@ def buscar_dados_mercado(ids_moedas: list[str]):
         print('Lista de moedas inválida')
         return pd.DataFrame()
         
-    ids = ",".join(ids_moedas)
+    ids = ','.join(ids_moedas)
     url = f'{BASE_URL}/coins/markets?vs_currency=usd&ids={ids}'
     
     df = buscar_dados_da_api(url)
