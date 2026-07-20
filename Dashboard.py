@@ -25,4 +25,5 @@ dados_mercado = processar_dados_mercado(dados_mercado, historico_moedas)
 
 grafico_candles = criar_grafico_preco(historico_moedas, 90)
 
+st.title('Preço do Bitcoin (BTC)\nÚltimos 90 Dias')
 st.plotly_chart(grafico_candles, use_container_width=True)

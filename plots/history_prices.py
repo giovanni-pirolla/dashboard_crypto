@@ -23,9 +23,11 @@ def criar_grafico_preco(df_historico: pd.DataFrame, dias: int):
     if ultimo_movimento >= 0:
         cor_linha = "#22C55E"
         cor_preenchimento = "rgba(34,197,94,0.15)"
+        cor_tracado = "rgba(34, 197, 94, 0.70)"
     else:
         cor_linha = "#EF4444"
         cor_preenchimento = "rgba(239,68,68,0.15)"
+        cor_tracado = "rgba(239, 68, 68, 0.70)"
 
     fig.add_trace(
         go.Scatter(
@@ -58,7 +60,7 @@ def criar_grafico_preco(df_historico: pd.DataFrame, dias: int):
                 x=df_historico["date"],
                 y=df_historico[f"ma{janela}"],
                 mode="lines",
-                name=f"MA{janela}",
+                name=f"MA {janela}",
                 line=dict(
                     color=cor,
                     width=2
@@ -66,7 +68,7 @@ def criar_grafico_preco(df_historico: pd.DataFrame, dias: int):
                 meta=janela,
                 customdata=df_historico[[f"ma{janela}"]],
                 hovertemplate=
-                "<br><b>MA%{meta}</b><br>"
+                "<br><b>MA %{meta}</b><br>"
                 "$%{customdata[0]:,.2f}"
                 "<extra></extra>"
             ),
@@ -86,9 +88,25 @@ def criar_grafico_preco(df_historico: pd.DataFrame, dias: int):
             hovertemplate=
             "<br><b>Volume</b><br>"
             "%{customdata[0]} USD"
-            "<extra></extra>"
+            "<extra></extra>",
+            showlegend=False
         ),
         row=2,
+        col=1
+    )
+    
+    fig.add_hline(
+        y=df_historico['price'].iloc[-1],
+        line_dash="dash",
+        line_color=cor_tracado,
+        annotation_text=f"<b>${df_historico['price'].iloc[-1]:,.2f}<b>",
+        annotation_position="top right",
+        annotation_font=dict(
+            color=cor_tracado,
+            size=13
+        ),
+        annotation_yshift=+5,
+        row=1,
         col=1
     )
 
@@ -139,8 +157,7 @@ def criar_grafico_preco(df_historico: pd.DataFrame, dias: int):
         gridcolor="rgba(255,255,255,0.10)",
         showline=True,
         linewidth=1,
-        linecolor="rgba(255,255,255,0.10)",
-        tickprefix="$"
+        linecolor="rgba(255,255,255,0.10)"
     )
 
     fig.update_yaxes(
