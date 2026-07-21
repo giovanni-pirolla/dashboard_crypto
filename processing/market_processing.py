@@ -20,10 +20,12 @@ def processar_dados_mercado(df_mercado: pd.DataFrame, df_historico: pd.DataFrame
     df_mercado['atl_distance_pct'] = (df_mercado['price'] - df_mercado['atl'])/df_mercado['atl'] * 100
     
     # Percentual de Supply
+    if df_mercado['max_supply'] is None:
+        df_mercado['supply_pct'] = None
     df_mercado['supply_pct'] = (df_mercado['circulating_supply'] / df_mercado['max_supply']) * 100
     
     # Faixa de Mercado 
-    df_mercado['market_category'] = df_historico['market_cap'].apply(lambda market_cap: (
+    df_mercado['market_category'] = df_mercado['market_cap'].apply(lambda market_cap: (
         'Big Cap' if market_cap >= BIG_CAP
         else 'Mid Cap' if market_cap >= SMALL_CAP
         else 'Small Cap'
