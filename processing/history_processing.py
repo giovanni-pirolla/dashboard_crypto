@@ -15,7 +15,7 @@ def formatar_numero(numero):
         if numero >= divisor:
             return f'{(numero/divisor):,.2f}{sufixo}'
     
-    return numero
+    return f"{numero:,.2f}"
 
 def processar_historico(df_historico: pd.DataFrame):
     # Aqui serão calculadas métricas relacionadas ao histórico de preço das moedas

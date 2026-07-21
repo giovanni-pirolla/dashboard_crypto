@@ -7,8 +7,8 @@ ALTA_MODERADA = 3
 ALTA_FORTE = 10
 
 # Constantes para Faixa de Mercado
+SMALL_CAP = 2e9
 BIG_CAP = 1e10
-SMALL_CAP = 2e10
 
 def processar_dados_mercado(df_mercado: pd.DataFrame, df_historico: pd.DataFrame):
     # Aqui, serão calculadas métricas úteis para traders com base nas informações gerais sobre cada moeda, que serão exibidas em cards no dashboard

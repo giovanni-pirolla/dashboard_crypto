@@ -15,7 +15,7 @@ def criar_grafico_preco(df_historico: pd.DataFrame, dias: int):
         cols=1,
         shared_xaxes=True,
         row_heights=[0.85, 0.15],
-        vertical_spacing=0.05
+        vertical_spacing=0.04
     )
     
     ultimo_movimento = df_historico["price_diff"].iloc[-1]
@@ -145,7 +145,10 @@ def criar_grafico_preco(df_historico: pd.DataFrame, dias: int):
         showline=True,
         linewidth=1,
         linecolor="rgba(255,255,255,0.10)",
-        tickformat="%d/%m"
+        tickformat="%d/%m",
+        unifiedhovertitle=dict(
+            text="<b>%{x|%d/%m/%Y}</b>"
+        )
     )
 
     fig.update_yaxes(
