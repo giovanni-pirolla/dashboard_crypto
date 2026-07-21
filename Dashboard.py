@@ -56,7 +56,7 @@ with volume_col:
     st.metric("Volume", resumo_moedas["volume_fmt"], resumo_moedas[f'volume_delta_{periodo}_fmt'])
 
 with drawdown_col:
-    st.metric("Drawdown", resumo_moedas["drawdown_fmt"], resumo_moedas['drawdown_delta_fmt'])
+    st.metric("Volatilidade", resumo_moedas[f"volatility_{periodo}_fmt"], resumo_moedas[f'volatility_delta_{periodo}_fmt'])
     
 grafico_historico = criar_grafico_preco(historico_moeda, periodo)
 

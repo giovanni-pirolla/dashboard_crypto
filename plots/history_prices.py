@@ -23,11 +23,9 @@ def criar_grafico_preco(df_historico: pd.DataFrame, dias: int):
     if ultimo_movimento >= 0:
         cor_linha = "#22C55E"
         cor_preenchimento = "rgba(34,197,94,0.15)"
-        cor_tracado = "rgba(34, 197, 94, 0.70)"
     else:
         cor_linha = "#EF4444"
         cor_preenchimento = "rgba(239,68,68,0.15)"
-        cor_tracado = "rgba(239, 68, 68, 0.70)"
 
     fig.add_trace(
         go.Scatter(
@@ -92,21 +90,6 @@ def criar_grafico_preco(df_historico: pd.DataFrame, dias: int):
             showlegend=False
         ),
         row=2,
-        col=1
-    )
-    
-    fig.add_hline(
-        y=df_historico['price'].iloc[-1],
-        line_dash="dash",
-        line_color=cor_tracado,
-        annotation_text=f"<b>${df_historico['price'].iloc[-1]:,.2f}<b>",
-        annotation_position="top right",
-        annotation_font=dict(
-            color=cor_tracado,
-            size=13
-        ),
-        annotation_yshift=+5,
-        row=1,
         col=1
     )
 

@@ -37,10 +37,11 @@ def processar_historico(df_historico: pd.DataFrame):
     for janela in JANELAS:
         df_historico[f"ma{janela}"] = df_historico["price"].rolling(window=janela).mean()
         df_historico[f"ma_distance_{janela}"] = ((df_historico["price"] - df_historico[f"ma{janela}"]) / df_historico[f"ma{janela}"]) * 100
-        df_historico[f"ma_distance_delta_{janela}"] = df_historico[f"ma_distance_{janela}"].diff()
 
-        df_historico[f"volatility_{janela}"] = df_historico["daily_return"].rolling(window=janela).std()
+        df_historico[f"volatility_{janela}"] = df_historico["daily_return"].rolling(window=janela, min_periods=1).std()
         df_historico[f"volatility_delta_{janela}"] = df_historico[f"volatility_{janela}"].diff()
+        
+        print(df_historico[f'volatility_{janela}'])
 
         df_historico[f"avg_volume_{janela}"] = df_historico["volume"].rolling(window=janela).mean()
         df_historico[f"relative_volume_{janela}"] = df_historico["volume"] / df_historico[f"avg_volume_{janela}"]
@@ -60,3 +61,4 @@ def processar_historico(df_historico: pd.DataFrame):
     df_historico["formatted_volume"] = df_historico["volume"].apply(formatar_numero)
 
     return df_historico
+

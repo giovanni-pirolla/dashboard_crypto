@@ -78,9 +78,6 @@ def gerar_resumo(df_historico: pd.DataFrame, df_mercado: pd.DataFrame):
         resumo[f"ma_distance_{janela}"] = ultimo_historico[f"ma_distance_{janela}"]
         resumo[f"ma_distance_{janela}_fmt"] = f"{ultimo_historico[f'ma_distance_{janela}']:.2f}%"
 
-        resumo[f"ma_distance_delta_{janela}"] = ultimo_historico[f"ma_distance_delta_{janela}"]
-        resumo[f"ma_distance_delta_{janela}_fmt"] = f"{ultimo_historico[f'ma_distance_delta_{janela}']:.2f}%"
-
         resumo[f"volatility_{janela}"] = ultimo_historico[f"volatility_{janela}"]
         resumo[f"volatility_{janela}_fmt"] = f"{ultimo_historico[f'volatility_{janela}']:.2f}%"
 
