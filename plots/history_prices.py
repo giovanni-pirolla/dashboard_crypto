@@ -126,6 +126,7 @@ def criar_grafico_preco(df_historico: pd.DataFrame, dias: int):
             color="white"
         ),
         hovermode="x unified",
+        height=450,
         yaxis_title="Preço (USD)",
         xaxis=dict(
             unifiedhovertitle=dict(

@@ -13,6 +13,8 @@ COLUNAS_MERCADO = [
     'current_price',
     'market_cap',
     'market_cap_rank',
+    'market_cap_change_24h',
+    'market_cap_change_percentage_24h',
     'total_volume',
     'high_24h',
     'low_24h',
@@ -66,6 +68,17 @@ def buscar_moedas():
     
     return df
 
+@st.cache_data(ttl=86400)
+def buscar_mapeamento_moedas():
+    df_moedas = buscar_moedas()
+
+    return dict(
+        zip(
+            df_moedas["id"],
+            df_moedas["name"]
+        )
+    )
+
 @st.cache_data(ttl=300)
 def buscar_historico_moeda(id_moeda: str, dias: int):
     interval = 'daily'
@@ -109,13 +122,12 @@ def buscar_historico_moeda(id_moeda: str, dias: int):
     return df
 
 @st.cache_data(ttl=60)
-def buscar_dados_mercado(ids_moedas: list[str]):
-    if not ids_moedas:
+def buscar_dados_mercado(id_moeda: str):
+    if not id_moeda:
         print('Lista de moedas inválida')
         return pd.DataFrame()
         
-    ids = ','.join(ids_moedas)
-    url = f'{BASE_URL}/coins/markets?vs_currency=usd&ids={ids}'
+    url = f'{BASE_URL}/coins/markets?vs_currency=usd&ids={id_moeda}'
     
     df = buscar_dados_da_api(url)
     if df is None:
@@ -125,3 +137,7 @@ def buscar_dados_mercado(ids_moedas: list[str]):
     df = df.rename(columns=RENOMEAR_COLUNAS_MERCADO)
     
     return df
+
+mercado = buscar_dados_mercado('ethereum')
+
+print(mercado.isna())
