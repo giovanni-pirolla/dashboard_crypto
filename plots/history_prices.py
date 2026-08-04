@@ -9,7 +9,7 @@ CORES_MEDIAS = {
 }
 
 
-def criar_grafico_preco(df_historico: pd.DataFrame, dias: int):
+def criar_grafico_preco(df_historico: pd.DataFrame, dias: int, moeda: str):
     fig = make_subplots(
         rows=2,
         cols=1,

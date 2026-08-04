@@ -1,63 +1,111 @@
 import streamlit as st
-import pandas as pd
-from services.coingecko import buscar_moedas, buscar_historico_moeda, buscar_dados_mercado, buscar_mapeamento_moedas
+
+from services.coingecko import (
+    buscar_moedas,
+    buscar_historico_moeda,
+    buscar_dados_mercado,
+    buscar_mapeamento_moedas
+)
+
 from plots.history_prices import criar_grafico_preco
 from processing.history_processing import processar_historico, JANELAS
 from processing.market_processing import processar_dados_mercado
-from processing.summary_processing import gerar_resumo
+
+from utils.formatting import formatar_numero
 
 st.set_page_config(layout="wide")
 
-st.markdown('## Dashboard de Análise de Criptomoedas')
+st.markdown("## Dashboard de Análise de Criptomoedas")
 
 moedas = buscar_moedas()
 
-ids = moedas['id']
+ids = moedas["id"]
 nomes_moedas = buscar_mapeamento_moedas()
 
-col1_select, col2_select = st.columns(2, gap='large')
+col1_select, col2_select = st.columns(2, gap="large")
 
 with col1_select:
     indice_padrao = ids[ids == "bitcoin"].index[0]
-    moeda = st.selectbox('Selecione uma CriptoMoeda para ser Analisada', options=ids, format_func=lambda id: nomes_moedas[id], index=indice_padrao)
+
+    moeda = st.selectbox(
+        "Selecione uma CriptoMoeda para ser Analisada",
+        options=ids,
+        format_func=lambda id: nomes_moedas[id],
+        index=indice_padrao
+    )
 
 with col2_select:
-    periodo = st.segmented_control('Período (Dias)', JANELAS, default=30)
+    periodo = st.segmented_control(
+        "Período (Dias)",
+        JANELAS,
+        default=30
+    )
 
 historico_moeda = buscar_historico_moeda(moeda, periodo)
 historico_moeda = processar_historico(historico_moeda)
+
 dados_mercado = buscar_dados_mercado(moeda)
 dados_mercado = processar_dados_mercado(dados_mercado, historico_moeda)
-resumo_moedas = gerar_resumo(historico_moeda, dados_mercado)
 
-preco_col, variacao_col, market_cap_col, ranking_col = st.columns(4)
+ultimo_historico = historico_moeda.iloc[-1]
+ultimo_mercado = dados_mercado.iloc[-1]
 
-with preco_col:
-    st.metric("Preço Atual", resumo_moedas["price_fmt"], resumo_moedas["price_diff_fmt"])
+col1, col2, col3, col4 = st.columns(4)
 
-with variacao_col:
-    st.metric("Retorno Diário", resumo_moedas["daily_return_fmt"])
+with col1:
+    st.metric(
+        "Preço Atual",
+        f"${ultimo_historico['price']:,.2f}",
+        f"${ultimo_historico['price_diff']:,.2f}"
+    )
 
-with market_cap_col:
-    st.metric("Market Cap", resumo_moedas["market_cap_fmt"], resumo_moedas["market_cap_change_percentage_24h_fmt"])
+with col2:
+    st.metric(
+        "Retorno Diário",
+        f"{ultimo_historico['daily_return']:.2f}%"
+    )
 
-with ranking_col:
-    st.metric("Posição no Ranking", resumo_moedas["rank_fmt"])
+with col3:
+    st.metric(
+        "Market Cap",
+        formatar_numero(ultimo_mercado["market_cap"]),
+        f"{ultimo_mercado['market_cap_change_percentage_24h']:.2f}%"
+    )
 
-ath_col, distancia_ma_col, volume_col, drawdown_col = st.columns(4, gap="medium")
+with col4:
+    st.metric(
+        "Posição no Ranking",
+        f"{int(ultimo_mercado['rank'])}º"
+    )
 
-with ath_col:
-    st.metric("ATH (All Time High)", resumo_moedas["ath_fmt"])
+col5, col6, col7, col8 = st.columns(4)
 
-with distancia_ma_col:
-    st.metric(f"Distância do MA {periodo}", resumo_moedas[f"ma_distance_{periodo}_fmt"])
+with col5:
+    st.metric(
+        "ATH (All Time High)",
+        f"${ultimo_mercado['ath']:,.2f}"
+    )
 
-with volume_col:
-    st.metric("Volume", resumo_moedas["volume_fmt"], resumo_moedas[f'volume_delta_{periodo}_fmt'])
+with col6:
+    st.metric(
+        f"Distância do MA {periodo}",
+        f"{ultimo_historico[f'ma_distance_{periodo}']:.2f}%"
+    )
 
-with drawdown_col:
-    st.metric("Volatilidade", resumo_moedas[f"volatility_{periodo}_fmt"], resumo_moedas[f'volatility_delta_{periodo}_fmt'])
-    
-grafico_historico = criar_grafico_preco(historico_moeda, periodo)
+with col7:
+    st.metric(
+        "Volume",
+        formatar_numero(ultimo_mercado["volume"]),
+        f"{ultimo_historico[f'volume_delta_{periodo}']:.2f}%"
+    )
+
+with col8:
+    st.metric(
+        "Volatilidade",
+        f"{ultimo_historico[f'volatility_{periodo}']:.2f}%",
+        f"{ultimo_historico[f'volatility_delta_{periodo}']:.2f}%"
+    )
+
+grafico_historico = criar_grafico_preco(historico_moeda, periodo, moeda)
 
 st.plotly_chart(grafico_historico, use_container_width=True)
