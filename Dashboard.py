@@ -11,14 +11,11 @@ from plots.history_prices import criar_grafico_preco
 from processing.history_processing import processar_historico, JANELAS
 from processing.market_processing import processar_dados_mercado
 from processing.metric_analysis import (
-    analisar_retorno,
     analisar_market_cap,
-    analisar_retorno_acumulado,
     analisar_volume_relativo,
     analisar_ma,
     analisar_ath,
-    analisar_drawdown,
-    analisar_volatilidade
+    analisar_delta
 )
 
 from utils.formatting import formatar_numero
@@ -68,14 +65,14 @@ ultimo_historico = historico_moeda.iloc[-1]
 ultimo_mercado = dados_mercado.iloc[-1]
 
 # Carregamento das análises das métricas
-analise_retorno = analisar_retorno(ultimo_historico["daily_return"])
+analise_retorno = analisar_delta(ultimo_historico["daily_return"])
 analise_market_cap = analisar_market_cap(ultimo_mercado["market_category"])
 analise_volume_relativo = analisar_volume_relativo(ultimo_historico[f"relative_volume_{periodo}"])
 analise_ma = analisar_ma(ultimo_historico[f"ma_distance_{periodo}"])
 analise_ath = analisar_ath(ultimo_mercado["ath_distance_pct"])
-analise_drawdown = analisar_drawdown(ultimo_historico["drawdown_delta"])
-analise_volatilidade = analisar_volatilidade(ultimo_historico[f"volatility_delta_{periodo}"])
-analise_retorno_acumulado = analisar_retorno_acumulado(ultimo_historico["cumulative_return_delta"])
+analise_drawdown = analisar_delta(ultimo_historico["drawdown_delta"])
+analise_volatilidade = analisar_delta(ultimo_historico[f"volatility_delta_{periodo}"])
+analise_retorno_acumulado = analisar_delta(ultimo_historico["cumulative_return_delta"])
 
 st.divider()
 
@@ -142,7 +139,7 @@ with col8:
 
 grafico_historico = criar_grafico_preco(historico_moeda, periodo, moeda)
 
-col1_grafico, col2_grafico = st.columns([2, 1], gap="large")
+col_grafico, col_tabela = st.columns([2, 1], gap="large")
 
-with col1_grafico:
+with col_grafico:
     st.plotly_chart(grafico_historico, use_container_width=True)
