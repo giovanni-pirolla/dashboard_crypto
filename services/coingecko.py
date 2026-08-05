@@ -137,7 +137,3 @@ def buscar_dados_mercado(id_moeda: str):
     df = df.rename(columns=RENOMEAR_COLUNAS_MERCADO)
     
     return df
-
-mercado = buscar_dados_mercado('ethereum')
-
-print(mercado.isna())
