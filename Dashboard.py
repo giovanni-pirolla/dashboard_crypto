@@ -10,12 +10,25 @@ from services.coingecko import (
 from plots.history_prices import criar_grafico_preco
 from processing.history_processing import processar_historico, JANELAS
 from processing.market_processing import processar_dados_mercado
+from processing.metric_analysis import (
+    analisar_retorno,
+    analisar_market_cap,
+    analisar_volume_relativo,
+    analisar_ma,
+    analisar_ath,
+    analisar_drawdown,
+    analisar_volatilidade
+)
 
 from utils.formatting import formatar_numero
+from utils.fonts import carregar_fontes
+
+carregar_fontes()
 
 st.set_page_config(layout="wide")
 
-st.markdown("## Dashboard de Análise de Criptomoedas")
+st.markdown("# Dashboard de Análise de Criptomoedas")
+st.space()
 
 # 
 moedas = buscar_moedas()
@@ -53,6 +66,15 @@ dados_mercado = processar_dados_mercado(dados_mercado, historico_moeda)
 ultimo_historico = historico_moeda.iloc[-1]
 ultimo_mercado = dados_mercado.iloc[-1]
 
+# Carregamento das análises das métricas
+analise_retorno = analisar_retorno(ultimo_historico["daily_return"])
+analise_market_cap = analisar_market_cap(ultimo_mercado["market_category"])
+analise_volume_relativo = analisar_volume_relativo(ultimo_historico[f"relative_volume_{periodo}"])
+analise_ma = analisar_ma(ultimo_historico[f"ma_distance_{periodo}"])
+analise_ath = analisar_ath(ultimo_mercado["ath_distance_pct"])
+analise_drawdown = analisar_drawdown(ultimo_historico["drawdown"])
+analise_volatilidade = analisar_volatilidade(ultimo_historico[f"volatility_{periodo}"])
+
 st.divider()
 
 # Colunas de Métricas
@@ -61,29 +83,30 @@ col1, col2, col3, col4 = st.columns(4)
 with col1:
     st.metric(
         "Preço Atual",
-        f"${ultimo_historico['price']:,.2f}",
-        f"{ultimo_historico['daily_return']:.2f}%"
+        f"${ultimo_historico['price']:,.2f}"
     )
+    st.badge(f"{ultimo_historico['daily_return']:.2f}%", color=analise_retorno["color"], icon=analise_retorno["icon"])
 
 with col2:
     st.metric(
-        "Retorno Diário",
-        f"{ultimo_historico['daily_return']:.2f}%"
+        f"Retorno Acumulado ({periodo} dias)",
+        f"{ultimo_historico['cumulative_return']:.2f}%"
     )
+    st.badge(f'{analise_retorno["label"]}', color=analise_retorno["color"], icon=analise_retorno["icon"])
 
 with col3:
     st.metric(
         "Market Cap",
         formatar_numero(ultimo_mercado["market_cap"]),
-        # f"{ultimo_mercado['market_cap_change_percentage_24h']:.2f}%"
     )
-    st.badge(f'{ultimo_mercado["market_category"]}', color="primary")
+    st.badge(f'{analise_market_cap["label"]}', color=analise_market_cap["color"], icon=analise_market_cap["icon"])
 
 with col4:
     st.metric(
         "Drawdown",
         f"{ultimo_historico['drawdown']:.2f}%"
     )
+    st.badge(f'{analise_drawdown["label"]}', color=analise_drawdown["color"], icon=analise_drawdown["icon"])
     
 
 col5, col6, col7, col8 = st.columns(4)
@@ -93,24 +116,28 @@ with col5:
         "Distância do ATH",
         f"{ultimo_mercado['ath_distance_pct']:,.2f}%"
     )
+    st.badge(f'{analise_ath["label"]}', color=analise_ath["color"], icon=analise_ath["icon"])
 
 with col6:
     st.metric(
         f"Distância do MA {periodo}",
         f"{ultimo_historico[f'ma_distance_{periodo}']:.2f}%"
     )
-
+    st.badge(f'{analise_ma["label"]}', color=analise_ma["color"], icon=analise_ma["icon"])
+    
 with col7:
     st.metric(
         "Volume Relativo",
         f"{formatar_numero(ultimo_historico[f'relative_volume_{periodo}'])}x",
     )
+    st.badge(f'{analise_volume_relativo["label"]}', color=analise_volume_relativo["color"], icon=analise_volume_relativo["icon"])
 
 with col8:
     st.metric(
         "Volatilidade",
         f"{ultimo_historico[f'volatility_{periodo}']:.2f}%",
     )
+    st.badge(f'{analise_volatilidade["label"]}', color=analise_volatilidade["color"], icon=analise_volatilidade["icon"])
 
 grafico_historico = criar_grafico_preco(historico_moeda, periodo, moeda)
 

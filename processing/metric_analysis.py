@@ -1,256 +1,253 @@
 import pandas as pd
+from utils.fonts import carregar_fontes
 
 ANALISE_VOLUME_RELATIVO = {
     "Muito Alto": {
-        "icon": "🟢",
-        "color": "#22c55e",
-        "background": "#14532d",
+        "icon": ":material/arrow_outward:",
+        "color": "green",
+        "background": "green",
         "label": "Muito Alto"
     },
     "Alto": {
-        "icon": "🟢",
-        "color": "#4ade80",
-        "background": "#166534",
+        "icon": ":material/arrow_outward:",
+        "color": "green",
+        "background": "green",
         "label": "Alto"
     },
     "Normal": {
-        "icon": "🟡",
-        "color": "#facc15",
-        "background": "#713f12",
+        "icon": ":material/check_indeterminate_small:",
+        "color": "yellow",
+        "background": "yellow",
         "label": "Normal"
     },
     "Baixo": {
-        "icon": "🟠",
-        "color": "#fb923c",
-        "background": "#7c2d12",
+        "icon": ":material/arrow_downward:",
+        "color": "orange",
+        "background": "orange",
         "label": "Baixo"
     },
     "Muito Baixo": {
-        "icon": "🔴",
-        "color": "#ef4444",
-        "background": "#7f1d1d",
+        "icon": ":material/arrow_downward:",
+        "color": "red",
+        "background": "red",
         "label": "Muito Baixo"
     }
 }
 
 
-def analisar_volume_relativo(volume_relativo):
-    if volume_relativo >= 2:
+def analisar_volume_relativo(delta):
+    if delta >= 30:
         return ANALISE_VOLUME_RELATIVO["Muito Alto"]
 
-    if volume_relativo >= 1.3:
+    if delta >= 10:
         return ANALISE_VOLUME_RELATIVO["Alto"]
 
-    if volume_relativo >= 0.8:
+    if delta >= -10:
         return ANALISE_VOLUME_RELATIVO["Normal"]
 
-    if volume_relativo >= 0.5:
+    if delta >= -30:
         return ANALISE_VOLUME_RELATIVO["Baixo"]
 
     return ANALISE_VOLUME_RELATIVO["Muito Baixo"]
 
 ANALISE_MA = {
     "Muito Acima": {
-        "icon": "🚀",
-        "color": "#16a34a",
-        "background": "#14532d",
+        "icon": ":material/arrow_outward:",
+        "color": "green",
+        "background": "green",
         "label": "Muito Acima"
     },
     "Acima": {
-        "icon": "🟢",
-        "color": "#22c55e",
-        "background": "#166534",
+        "icon": ":material/arrow_outward:",
+        "color": "green",
+        "background": "green",
         "label": "Acima"
     },
     "Neutra": {
-        "icon": "🟡",
-        "color": "#eab308",
-        "background": "#713f12",
+        "icon": ":material/check_indeterminate_small:",
+        "color": "yellow",
+        "background": "yellow",
         "label": "Neutra"
     },
     "Abaixo": {
-        "icon": "🟠",
-        "color": "#fb923c",
-        "background": "#7c2d12",
+        "icon": ":material/arrow_downward:",
+        "color": "orange",
+        "background": "orange",
         "label": "Abaixo"
     },
     "Muito Abaixo": {
-        "icon": "🔴",
-        "color": "#ef4444",
-        "background": "#7f1d1d",
+        "icon": ":material/arrow_downward:",
+        "color": "red",
+        "background": "red",
         "label": "Muito Abaixo"
     }
 }
 
 
-def analisar_ma(distancia):
-    if distancia >= 10:
+def analisar_ma(delta):
+    if delta >= 2:
         return ANALISE_MA["Muito Acima"]
 
-    if distancia >= 3:
+    if delta >= 0.5:
         return ANALISE_MA["Acima"]
 
-    if distancia >= -3:
+    if delta >= -0.5:
         return ANALISE_MA["Neutra"]
 
-    if distancia >= -10:
+    if delta >= -2:
         return ANALISE_MA["Abaixo"]
 
     return ANALISE_MA["Muito Abaixo"]
 
 ANALISE_ATH = {
     "Muito Próximo": {
-        "icon": "🏆",
-        "color": "#22c55e",
-        "background": "#14532d",
+        "icon": ":material/arrow_outward:",
+        "color": "green",
+        "background": "green",
         "label": "Muito Próximo"
     },
     "Próximo": {
-        "icon": "🟢",
-        "color": "#4ade80",
-        "background": "#166534",
+        "icon": ":material/arrow_outward:",
+        "color": "green",
+        "background": "green",
         "label": "Próximo"
     },
     "Correção": {
-        "icon": "🟡",
-        "color": "#facc15",
-        "background": "#713f12",
+        "icon": ":material/check_indeterminate_small:",
+        "color": "yellow",
+        "background": "yellow",
         "label": "Correção"
     },
     "Muito Distante": {
-        "icon": "🔴",
-        "color": "#ef4444",
-        "background": "#7f1d1d",
+        "icon": ":material/arrow_downward:",
+        "color": "red",
+        "background": "red",
         "label": "Muito Distante"
     }
 }
 
 
-def analisar_ath(distancia):
-    distancia = abs(distancia)
-
-    if distancia <= 10:
+def analisar_ath(delta):
+    if delta >= 3:
         return ANALISE_ATH["Muito Próximo"]
 
-    if distancia <= 30:
+    if delta >= 1:
         return ANALISE_ATH["Próximo"]
 
-    if distancia <= 60:
+    if delta >= -1:
         return ANALISE_ATH["Correção"]
 
     return ANALISE_ATH["Muito Distante"]
 
 ANALISE_DRAWDOWN = {
     "Leve": {
-        "icon": "🟢",
-        "color": "#22c55e",
-        "background": "#14532d",
+        "icon": ":material/arrow_outward:",
+        "color": "green",
+        "background": "green",
         "label": "Correção Leve"
     },
     "Moderado": {
-        "icon": "🟡",
-        "color": "#eab308",
-        "background": "#713f12",
+        "icon": ":material/check_indeterminate_small:",
+        "color": "yellow",
+        "background": "yellow",
         "label": "Correção"
     },
     "Forte": {
-        "icon": "🟠",
-        "color": "#fb923c",
-        "background": "#7c2d12",
+        "icon": ":material/arrow_downward:",
+        "color": "orange",
+        "background": "orange",
         "label": "Queda Forte"
     },
     "Severo": {
-        "icon": "🔴",
-        "color": "#ef4444",
-        "background": "#7f1d1d",
+        "icon": ":material/arrow_downward:",
+        "color": "red",
+        "background": "red",
         "label": "Bear Market"
     }
 }
 
 
-def analisar_drawdown(drawdown):
-    drawdown = abs(drawdown)
-
-    if drawdown <= 10:
+def analisar_drawdown(delta):
+    if delta >= 3:
         return ANALISE_DRAWDOWN["Leve"]
 
-    if drawdown <= 30:
+    if delta >= 1:
         return ANALISE_DRAWDOWN["Moderado"]
 
-    if drawdown <= 50:
+    if delta >= -1:
         return ANALISE_DRAWDOWN["Forte"]
 
     return ANALISE_DRAWDOWN["Severo"]
 
 ANALISE_VOLATILIDADE = {
     "Baixa": {
-        "icon": "🟢",
-        "color": "#22c55e",
-        "background": "#14532d",
+        "icon": ":material/arrow_outward:",
+        "color": "green",
+        "background": "green",
         "label": "Baixa"
     },
     "Moderada": {
-        "icon": "🟡",
-        "color": "#facc15",
-        "background": "#713f12",
+        "icon": ":material/check_indeterminate_small:",
+        "color": "yellow",
+        "background": "yellow",
         "label": "Moderada"
     },
     "Alta": {
-        "icon": "🟠",
-        "color": "#fb923c",
-        "background": "#7c2d12",
+        "icon": ":material/arrow_downward:",
+        "color": "orange",
+        "background": "orange",
         "label": "Alta"
     },
     "Extrema": {
-        "icon": "🔴",
-        "color": "#ef4444",
-        "background": "#7f1d1d",
+        "icon": ":material/arrow_downward:",
+        "color": "red",
+        "background": "red",
         "label": "Extrema"
     }
 }
 
 
-def analisar_volatilidade(volatilidade):
-    if volatilidade <= 2:
+def analisar_volatilidade(delta):
+    if delta <= -1:
         return ANALISE_VOLATILIDADE["Baixa"]
 
-    if volatilidade <= 5:
+    if delta <= 0.3:
         return ANALISE_VOLATILIDADE["Moderada"]
 
-    if volatilidade <= 8:
+    if delta <= 1:
         return ANALISE_VOLATILIDADE["Alta"]
 
     return ANALISE_VOLATILIDADE["Extrema"]
 
 ANALISE_RETORNO = {
     "Alta Forte": {
-        "icon": "🚀",
-        "color": "#16a34a",
-        "background": "#14532d",
+        "icon": ":material/arrow_outward:",
+        "color": "green",
+        "background": "green",
         "label": "Alta Forte"
     },
     "Alta": {
-        "icon": "🟢",
-        "color": "#22c55e",
-        "background": "#166534",
+        "icon": ":material/arrow_outward:",
+        "color": "green",
+        "background": "green",
         "label": "Alta"
     },
     "Estável": {
-        "icon": "🟡",
-        "color": "#facc15",
-        "background": "#713f12",
+        "icon": ":material/check_indeterminate_small:",
+        "color": "yellow",
+        "background": "yellow",
         "label": "Estável"
     },
     "Queda": {
-        "icon": "🟠",
-        "color": "#fb923c",
-        "background": "#7c2d12",
+        "icon": ":material/arrow_downward:",
+        "color": "orange",
+        "background": "orange",
         "label": "Queda"
     },
     "Queda Forte": {
-        "icon": "🔴",
-        "color": "#ef4444",
-        "background": "#7f1d1d",
+        "icon": ":material/arrow_downward:",
+        "color": "red",
+        "background": "red",
         "label": "Queda Forte"
     }
 }
@@ -273,21 +270,21 @@ def analisar_retorno(retorno):
 
 ANALISE_MARKET_CAP = {
     "Big Cap": {
-        "icon": "🏦",
-        "color": "#3b82f6",
-        "background": "#1e3a8a",
+        "icon": ":material/arrow_outward:",
+        "color": "green",
+        "background": "green",
         "label": "Big Cap"
     },
     "Mid Cap": {
-        "icon": "🏢",
-        "color": "#8b5cf6",
-        "background": "#4c1d95",
+        "icon": ":material/check_indeterminate_small:",
+        "color": "yellow",
+        "background": "yellow",
         "label": "Mid Cap"
     },
     "Small Cap": {
-        "icon": "🏪",
-        "color": "#f97316",
-        "background": "#7c2d12",
+        "icon": ":material/arrow_downward:",
+        "color": "red",
+        "background": "red",
         "label": "Small Cap"
     }
 }
@@ -295,3 +292,18 @@ ANALISE_MARKET_CAP = {
 
 def analisar_market_cap(categoria):
     return ANALISE_MARKET_CAP[categoria]
+
+def analisar_retorno_acumulado(retorno):
+    if retorno >= 100:
+        return ANALISE_RETORNO_ACUMULADO["Muito Positivo"]
+
+    if retorno >= 20:
+        return ANALISE_RETORNO_ACUMULADO["Positivo"]
+
+    if retorno >= -20:
+        return ANALISE_RETORNO_ACUMULADO["Neutro"]
+
+    if retorno >= -50:
+        return ANALISE_RETORNO_ACUMULADO["Negativo"]
+
+    return ANALISE_RETORNO_ACUMULADO["Muito Negativo"]

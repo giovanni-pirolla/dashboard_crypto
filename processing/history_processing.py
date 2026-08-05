@@ -13,6 +13,7 @@ def processar_historico(df_historico: pd.DataFrame):
 
     preco_inicial = df_historico["price"].iloc[0]
     df_historico["cumulative_return"] = ((df_historico["price"] - preco_inicial) / preco_inicial) * 100
+    df_historico["cumulative_return_delta"] = df_historico["cumulative_return"].diff()
 
     maior_preco_historico = df_historico["price"].cummax()
     df_historico["drawdown"] = ((df_historico["price"] - maior_preco_historico) / maior_preco_historico) * 100
@@ -41,5 +42,6 @@ def processar_historico(df_historico: pd.DataFrame):
 
     df_historico["price_trend"] = np.select(condicoes_tendencia, escolhas_tendencia, default="🟡 Consolidação")
     df_historico["price_diff"] = df_historico["price"].diff()
+    df_historico["formatted_volume"] = df_historico["volume"].apply(formatar_numero)
 
     return df_historico
