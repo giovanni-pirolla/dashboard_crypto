@@ -1,24 +1,8 @@
 import pandas as pd
 import numpy as np
+from utils.formatting import formatar_numero
 
 JANELAS = [7, 30, 90, 365]
-
-ESCALAS = [
-    (1_000_000_000_000, "T"),
-    (1_000_000_000, "B"),
-    (1_000_000, "M"),
-    (1_000, "K"),
-]
-
-def formatar_numero(numero):
-    if pd.isna(numero):
-        return "N/D"
-
-    for divisor, sufixo in ESCALAS:
-        if abs(numero) >= divisor:
-            return f"{numero/divisor:,.2f}{sufixo}"
-
-    return f"{numero:,.2f}"
 
 def processar_historico(df_historico: pd.DataFrame):
     if df_historico.empty:
@@ -39,7 +23,7 @@ def processar_historico(df_historico: pd.DataFrame):
         df_historico[f"ma_distance_{janela}"] = ((df_historico["price"] - df_historico[f"ma{janela}"]) / df_historico[f"ma{janela}"]) * 100
         df_historico[f"ma_distance_delta_{janela}"] = df_historico[f"ma_distance_{janela}"].diff()
 
-        df_historico[f"volatility_{janela}"] = df_historico["daily_return"].rolling(window=janela).std()
+        df_historico[f"volatility_{janela}"] = df_historico["daily_return"].rolling(window=janela, min_periods=1).std()
         df_historico[f"volatility_delta_{janela}"] = df_historico[f"volatility_{janela}"].diff()
 
         df_historico[f"avg_volume_{janela}"] = df_historico["volume"].rolling(window=janela).mean()
@@ -53,10 +37,9 @@ def processar_historico(df_historico: pd.DataFrame):
         (df_historico["price"] < df_historico["ma30"]) & (df_historico["ma30"] < df_historico["ma90"])
     ]
 
-    escolhas_tendencia = ["Forte Alta", "Alta", "Forte Baixa", "Baixa"]
+    escolhas_tendencia = ["🟢 Forte Alta", "🟢 Alta", "🔴 Forte Baixa", "🔴 Baixa"]
 
-    df_historico["price_trend"] = np.select(condicoes_tendencia, escolhas_tendencia, default="Consolidação")
+    df_historico["price_trend"] = np.select(condicoes_tendencia, escolhas_tendencia, default="🟡 Consolidação")
     df_historico["price_diff"] = df_historico["price"].diff()
-    df_historico["formatted_volume"] = df_historico["volume"].apply(formatar_numero)
 
     return df_historico
