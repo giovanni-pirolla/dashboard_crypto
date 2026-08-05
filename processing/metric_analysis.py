@@ -35,17 +35,17 @@ ANALISE_VOLUME_RELATIVO = {
 }
 
 
-def analisar_volume_relativo(delta):
-    if delta >= 30:
+def analisar_volume_relativo(volume_relativo):
+    if volume_relativo >= 2:
         return ANALISE_VOLUME_RELATIVO["Muito Alto"]
 
-    if delta >= 10:
+    if volume_relativo >= 1.3:
         return ANALISE_VOLUME_RELATIVO["Alto"]
 
-    if delta >= -10:
+    if volume_relativo >= 0.8:
         return ANALISE_VOLUME_RELATIVO["Normal"]
 
-    if delta >= -30:
+    if volume_relativo >= 0.5:
         return ANALISE_VOLUME_RELATIVO["Baixo"]
 
     return ANALISE_VOLUME_RELATIVO["Muito Baixo"]
@@ -84,17 +84,17 @@ ANALISE_MA = {
 }
 
 
-def analisar_ma(delta):
-    if delta >= 2:
+def analisar_ma(distancia):
+    if distancia >= 10:
         return ANALISE_MA["Muito Acima"]
 
-    if delta >= 0.5:
+    if distancia >= 3:
         return ANALISE_MA["Acima"]
 
-    if delta >= -0.5:
+    if distancia >= -3:
         return ANALISE_MA["Neutra"]
 
-    if delta >= -2:
+    if distancia >= -10:
         return ANALISE_MA["Abaixo"]
 
     return ANALISE_MA["Muito Abaixo"]
@@ -292,6 +292,39 @@ ANALISE_MARKET_CAP = {
 
 def analisar_market_cap(categoria):
     return ANALISE_MARKET_CAP[categoria]
+
+ANALISE_RETORNO_ACUMULADO = {
+    "Muito Positivo": {
+        "icon": ":material/arrow_outward:",
+        "color": "green",
+        "background": "green",
+        "label": "Muito Positivo"
+    },
+    "Positivo": {
+        "icon": ":material/arrow_outward:",
+        "color": "green",
+        "background": "green",
+        "label": "Positivo"
+    },
+    "Neutro": {
+        "icon": ":material/check_indeterminate_small:",
+        "color": "yellow",
+        "background": "yellow",
+        "label": "Neutro"
+    },
+    "Negativo": {
+        "icon": ":material/arrow_downward:",
+        "color": "orange",
+        "background": "orange",
+        "label": "Negativo"
+    },
+    "Muito Negativo": {
+        "icon": ":material/arrow_downward:",
+        "color": "red",
+        "background": "red",
+        "label": "Muito Negativo"
+    }
+}
 
 def analisar_retorno_acumulado(retorno):
     if retorno >= 100:

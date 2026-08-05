@@ -29,6 +29,9 @@ def processar_historico(df_historico: pd.DataFrame):
 
         df_historico[f"avg_volume_{janela}"] = df_historico["volume"].rolling(window=janela).mean()
         df_historico[f"relative_volume_{janela}"] = df_historico["volume"] / df_historico[f"avg_volume_{janela}"]
+        df_historico[f"relative_volume_delta_{janela}"] = (
+            df_historico[f"relative_volume_{janela}"].diff()
+        )
         df_historico[f"volume_delta_{janela}"] = ((df_historico["volume"] - df_historico[f"avg_volume_{janela}"]) / df_historico[f"avg_volume_{janela}"]) * 100
 
     condicoes_tendencia = [
