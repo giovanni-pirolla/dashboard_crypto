@@ -3,9 +3,9 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 CORES_MEDIAS = {
-    7: "rgba(59,130,246,0.75)",
-    30: "rgba(245,158,11,0.75)",
-    90: "rgba(168,85,247,0.75)"
+    7: "rgba(59,130,246,0.5)",
+    30: "rgba(245,158,11,0.5)",
+    90: "rgba(168,85,247,0.5)"
 }
 
 
@@ -35,7 +35,7 @@ def criar_grafico_preco(df_historico: pd.DataFrame, dias: int, moeda: str):
             name="Preço",
             line=dict(
                 color=cor_linha,
-                width=2
+                width=3
             ),
             fill="tozeroy",
             fillcolor=cor_preenchimento,
@@ -61,7 +61,7 @@ def criar_grafico_preco(df_historico: pd.DataFrame, dias: int, moeda: str):
                 name=f"MA {janela}",
                 line=dict(
                     color=cor,
-                    width=2
+                    width=3
                 ),
                 meta=janela,
                 customdata=df_historico[[f"ma{janela}"]],
@@ -101,6 +101,7 @@ def criar_grafico_preco(df_historico: pd.DataFrame, dias: int, moeda: str):
     )
 
     fig.update_layout(
+        title=f"<b>Histórico Diário de Preços - {moeda}</b>",
         paper_bgcolor="#111827",
         plot_bgcolor="#111827",
         font=dict(
