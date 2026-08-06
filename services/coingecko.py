@@ -137,3 +137,13 @@ def buscar_dados_mercado(id_moeda: str):
     df = df.rename(columns=RENOMEAR_COLUNAS_MERCADO)
     
     return df
+
+@st.cache_data(ttl=60)
+def buscar_todos_dados_mercado():
+    url = f'{BASE_URL}/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false'
+    
+    df = buscar_dados_da_api(url)
+    if df is None:
+        return pd.DataFrame()
+    
+    return df
