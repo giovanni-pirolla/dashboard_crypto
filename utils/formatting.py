@@ -16,3 +16,18 @@ def formatar_numero(numero):
             return f"{numero/divisor:,.2f}{sufixo}"
 
     return f"{numero:,.2f}"
+
+def formatar_tabela(df):
+    df_formatado = df.copy()
+    
+    df_formatado['Preço (USD)'] = df_formatado['Preço (USD)'].apply(formatar_numero)
+    df_formatado['Moeda'] = df_formatado['Moeda'].str.upper()
+        
+    return df_formatado
+
+def colorir_retorno(valor):
+    if valor > 0:
+        return "color: #22c55e;"   # verde
+    elif valor < 0:
+        return "color: #ef4444;"   # vermelho
+    return "color: #9ca3af;"

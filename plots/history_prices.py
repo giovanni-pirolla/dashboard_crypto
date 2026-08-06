@@ -9,7 +9,7 @@ CORES_MEDIAS = {
 }
 
 
-def criar_grafico_preco(df_historico: pd.DataFrame, dias: int, moeda: str):
+def criar_grafico_preco(df_historico: pd.DataFrame, dias: int, moeda: str, nomes_moedas: dict) -> go.Figure:
     fig = make_subplots(
         rows=2,
         cols=1,
@@ -101,7 +101,15 @@ def criar_grafico_preco(df_historico: pd.DataFrame, dias: int, moeda: str):
     )
 
     fig.update_layout(
-        title=f"<b>Histórico Diário de Preços - {moeda}</b>",
+        title={
+            "text": f"Histórico de Preços ({nomes_moedas[moeda]})",
+            "font": {
+                "size": 24,
+                "family": "Inter, sans-serif",
+                "color": "white"
+            },
+            "y": 0.89,           # centraliza o título
+        },
         paper_bgcolor="#111827",
         plot_bgcolor="#111827",
         font=dict(

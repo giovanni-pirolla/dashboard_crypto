@@ -4,7 +4,8 @@ from services.coingecko import (
     buscar_moedas,
     buscar_historico_moeda,
     buscar_dados_mercado,
-    buscar_mapeamento_moedas
+    buscar_mapeamento_moedas,
+    buscar_todos_dados_mercado
 )
 
 from plots.history_prices import criar_grafico_preco
@@ -18,7 +19,7 @@ from processing.metric_analysis import (
     analisar_delta
 )
 
-from utils.formatting import formatar_numero
+from utils.formatting import formatar_numero, formatar_tabela, colorir_retorno
 from utils.fonts import carregar_fontes
 
 carregar_fontes()
@@ -60,6 +61,8 @@ historico_moeda = processar_historico(historico_moeda)
 
 dados_mercado = buscar_dados_mercado(moeda)
 dados_mercado = processar_dados_mercado(dados_mercado, historico_moeda)
+
+todos_dados_mercado = buscar_todos_dados_mercado()
 
 ultimo_historico = historico_moeda.iloc[-1]
 ultimo_mercado = dados_mercado.iloc[-1]
@@ -137,9 +140,68 @@ with col8:
     )
     st.badge(f"{ultimo_historico[f'volatility_delta_{periodo}']:+.2f}%", color=analise_volatilidade["color"], icon=analise_volatilidade["icon"])
 
-grafico_historico = criar_grafico_preco(historico_moeda, periodo, moeda)
+
+st.divider()
+
+grafico_historico = criar_grafico_preco(historico_moeda, periodo, moeda, nomes_moedas)
 
 col_grafico, col_tabela = st.columns([2, 1], gap="large")
 
 with col_grafico:
     st.plotly_chart(grafico_historico, use_container_width=True)
+
+with col_tabela:
+    st.space()
+
+    df_tabela = todos_dados_mercado.copy()
+
+    df_tabela = df_tabela[
+        ["image", "symbol", "current_price", "price_change_percentage_24h"]
+    ]
+
+    df_tabela = df_tabela.rename(
+        columns={
+            "symbol": "Moeda",
+            "current_price": "Preço (USD)",
+            "price_change_percentage_24h": "Retorno Diário",
+        }
+    )
+
+    df_tabela = df_tabela.head(5)
+
+    df_tabela = formatar_tabela(df_tabela)
+
+    df_estilizado = (
+        df_tabela.style
+        .format({"Retorno Diário": "{:+.2f}%"})
+        .map(colorir_retorno, subset=["Retorno Diário"])
+        .set_properties(**{
+            "font-weight": "bold"
+        })
+        .set_table_styles([
+            {
+                "selector": "th",
+                "props": [
+                    ("font-weight", "bold"),
+                    ("font-size", "15px"),
+                ]
+            }
+        ])
+    )
+
+    st.subheader("Top 5 CriptoMoedas por Market Cap")
+
+    st.dataframe(
+        df_estilizado,
+        column_config={
+            "image": st.column_config.ImageColumn(
+                "Ícone",
+                width="small"
+            )
+        },
+        use_container_width=True,
+        hide_index=True
+    )
+    
+print(dados_mercado.columns)
+
