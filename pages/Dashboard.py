@@ -3,12 +3,14 @@ import streamlit as st
 from services.coingecko import (
     buscar_moedas,
     buscar_historico_moeda,
+    buscar_historico_intraday,
     buscar_dados_mercado,
     buscar_mapeamento_moedas,
     buscar_todos_dados_mercado
 )
 
 from plots.history_prices import criar_grafico_preco
+from plots.intraday_history import criar_grafico_intraday
 from processing.history_processing import processar_historico, JANELAS
 from processing.market_processing import processar_dados_mercado
 from processing.metric_analysis import (
@@ -21,6 +23,7 @@ from processing.metric_analysis import (
 
 from utils.formatting import formatar_numero, formatar_tabela, colorir_retorno
 from utils.fonts import carregar_fontes
+from components.metrics import montar_metricas_extras, exibir_metricas_extras
 
 carregar_fontes()
 
@@ -29,7 +32,10 @@ st.set_page_config(layout="wide")
 st.markdown("# Dashboard de Análise de Criptomoedas")
 st.space()
 
-# 
+# Configurações do modo 24h
+OPCAO_24H = "24h"
+JANELAS_INTRADAY = [6]  # janelas em horas (os dados são reamostrados para 1 hora)
+
 moedas = buscar_moedas()
 
 ids = moedas["id"]
@@ -49,15 +55,53 @@ with col1_select:
     )
 
 with col2_select:
-    periodo = st.segmented_control(
-        "Período (Dias)",
-        JANELAS,
-        default=30
+    periodo_selecionado = st.segmented_control(
+        "Período",
+        [OPCAO_24H] + JANELAS,
+        default=[OPCAO_24H],
+        format_func=lambda p: p if p == OPCAO_24H else f"{p} dias"
     )
 
+# O segmented_control retorna None se o usuário desmarcar a opção atual
+if periodo_selecionado is None:
+    periodo_selecionado = 30
+
+intraday = periodo_selecionado == OPCAO_24H
+
 # Carregamento dos dados processados
-historico_moeda = buscar_historico_moeda(moeda, periodo)
-historico_moeda = processar_historico(historico_moeda)
+if intraday:
+    periodo = JANELAS_INTRADAY[0]   # 6 (horas)
+    unidade = "h"
+    rotulo_periodo = "24h"
+
+    # Dados de 5 em 5 minutos, usados no gráfico
+    historico_intraday = buscar_historico_intraday(moeda)
+
+    if historico_intraday.empty:
+        st.error("Não foi possível carregar os dados das últimas 24h. Tente novamente em instantes.")
+        st.stop()
+
+    # Versão horária dos mesmos dados, usada nas métricas
+    historico_horario = (
+        historico_intraday.set_index("date")
+        .resample("1h").last()
+        .dropna()
+        .reset_index()
+    )
+
+    historico_moeda = processar_historico(historico_horario, janelas=JANELAS_INTRADAY)
+else:
+    periodo = periodo_selecionado
+    unidade = ""
+    rotulo_periodo = f"{periodo} dias"
+
+    historico_moeda = buscar_historico_moeda(moeda, periodo)
+
+    if historico_moeda.empty:
+        st.error("Não foi possível carregar o histórico da moeda. Tente novamente em instantes.")
+        st.stop()
+
+    historico_moeda = processar_historico(historico_moeda)
 
 dados_mercado = buscar_dados_mercado(moeda)
 dados_mercado = processar_dados_mercado(dados_mercado, historico_moeda)
@@ -66,6 +110,16 @@ todos_dados_mercado = buscar_todos_dados_mercado()
 
 ultimo_historico = historico_moeda.iloc[-1]
 ultimo_mercado = dados_mercado.iloc[-1]
+
+# No modo 24h, o volume é o acumulado das últimas 24h; compara com a média diária de 7 dias
+media_volume_7d = None
+
+if intraday:
+    historico_7d = buscar_historico_moeda(moeda, 7)
+
+    if not historico_7d.empty:
+        media_volume_7d = historico_7d["volume"].mean()
+        ultimo_historico[f"relative_volume_{periodo}"] = ultimo_historico["volume"] / media_volume_7d
 
 # Carregamento das análises das métricas
 analise_retorno = analisar_delta(ultimo_historico["daily_return"])
@@ -76,6 +130,9 @@ analise_ath = analisar_ath(ultimo_mercado["ath_distance_pct"])
 analise_drawdown = analisar_delta(ultimo_historico["drawdown_delta"])
 analise_volatilidade = analisar_delta(ultimo_historico[f"volatility_delta_{periodo}"])
 analise_retorno_acumulado = analisar_delta(ultimo_historico["cumulative_return_delta"])
+
+if intraday:
+    st.caption("Modo 24h: as métricas são calculadas com base nas últimas 24 horas, em janelas horárias.")
 
 st.divider()
 
@@ -91,7 +148,7 @@ with col1:
 
 with col2:
     st.metric(
-        f"Retorno Acumulado ({periodo} dias)",
+        f"Retorno Acumulado ({rotulo_periodo})",
         f"{ultimo_historico['cumulative_return']:.2f}%"
     )
     st.badge(f"{ultimo_historico['cumulative_return_delta']:+.2f}%", color=analise_retorno_acumulado["color"], icon=analise_retorno_acumulado["icon"])
@@ -121,7 +178,7 @@ with col5:
 
 with col6:
     st.metric(
-        f"Distância do MA {periodo}",
+        f"Distância do MA {periodo}{unidade}",
         f"{ultimo_historico[f'ma_distance_{periodo}']:.2f}%"
     )
     st.badge(f"{analise_ma['label']}", color=analise_ma["color"], icon=analise_ma["icon"])
@@ -143,14 +200,34 @@ with col8:
 
 st.divider()
 
-grafico_historico = criar_grafico_preco(historico_moeda, periodo, moeda, nomes_moedas)
+if intraday:
+    grafico_historico = criar_grafico_intraday(historico_intraday, moeda, nomes_moedas)
+else:
+    grafico_historico = criar_grafico_preco(historico_moeda, periodo, moeda, nomes_moedas)
 
-col_grafico, col_tabela = st.columns([2, 1], gap="large")
+col_grafico, col_tabela = st.columns([1.80, 1], gap="large")
 
 with col_grafico:
     st.plotly_chart(grafico_historico, use_container_width=True)
+    
+    st.divider()
+
+    st.subheader("Métricas Complementares", help="Métricas adicionais que fornecem insights sobre a moeda, incluindo volume médio, médias móveis e supply.")
+    st.space()
+
+    metricas_extras = montar_metricas_extras(
+        ultimo_historico,
+        ultimo_mercado,
+        periodo,
+        unidade,
+        intraday,
+        media_volume_7d
+    )
+    exibir_metricas_extras(metricas_extras)
 
 with col_tabela:
+    NUMERO_MOEDAS = 10
+    
     st.space()
 
     df_tabela = todos_dados_mercado.copy()
@@ -167,13 +244,16 @@ with col_tabela:
         }
     )
 
-    df_tabela = df_tabela.head(5)
+    df_tabela = df_tabela.head(NUMERO_MOEDAS)
 
     df_tabela = formatar_tabela(df_tabela)
 
     df_estilizado = (
         df_tabela.style
-        .format({"Retorno Diário": "{:+.2f}%"})
+        .format({
+            "Retorno Diário": "{:+.2f}%",
+            "Preço (USD)": formatar_numero
+        })
         .map(colorir_retorno, subset=["Retorno Diário"])
         .set_properties(**{
             "font-weight": "bold"
@@ -188,8 +268,9 @@ with col_tabela:
             }
         ])
     )
+    
 
-    st.subheader("Top 5 CriptoMoedas por Market Cap")
+    st.subheader(f"Top {NUMERO_MOEDAS} CriptoMoedas por Market Cap", help="Para uma análise mais detalhada do ranking de moedas, acesse o Market Explorer.")
 
     st.dataframe(
         df_estilizado,
@@ -202,6 +283,9 @@ with col_tabela:
         use_container_width=True,
         hide_index=True
     )
-    
-print(dados_mercado.columns)
-
+    st.page_link(
+        "pages/Market Explorer.py",
+        icon=":material/search:",
+        label="Explorar Mais Opções de CriptoMoedas",
+        use_container_width=True,
+    )

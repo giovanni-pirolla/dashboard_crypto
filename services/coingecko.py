@@ -147,3 +147,21 @@ def buscar_todos_dados_mercado():
         return pd.DataFrame()
     
     return df
+
+@st.cache_data(ttl=60)
+def buscar_historico_intraday(id_moeda: str):
+    url = f'{BASE_URL}/coins/{id_moeda}/market_chart?vs_currency=usd&days=1'
+
+    df = buscar_dados_da_api(url)
+    if df is None:
+        return pd.DataFrame()
+
+    df[['timestamp', 'price']] = pd.DataFrame(df['prices'].to_list(), index=df.index)
+    df[['_', 'volume']] = pd.DataFrame(df['total_volumes'].to_list(), index=df.index)
+
+    df['date'] = (
+        pd.to_datetime(df['timestamp'], unit='ms', utc=True)
+        .dt.tz_convert('America/Sao_Paulo')
+    )
+
+    return df[['date', 'price', 'volume']]
