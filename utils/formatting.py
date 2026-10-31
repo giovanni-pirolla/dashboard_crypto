@@ -19,8 +19,6 @@ def formatar_numero(numero):
 
 def formatar_tabela(df):
     df_formatado = df.copy()
-    
-    df_formatado['Preço (USD)'] = df_formatado['Preço (USD)'].apply(formatar_numero)
     df_formatado['Moeda'] = df_formatado['Moeda'].str.upper()
         
     return df_formatado

@@ -18,9 +18,9 @@ def criar_grafico_preco(df_historico: pd.DataFrame, dias: int, moeda: str, nomes
         vertical_spacing=0.04
     )
     
-    ultimo_movimento = df_historico["price_diff"].iloc[-1]
-    
-    if ultimo_movimento >= 0:
+    variacao = df_historico["price"].iloc[-1] - df_historico["price"].iloc[0]
+     
+    if variacao >= 0:
         cor_linha = "#22C55E"
         cor_preenchimento = "rgba(34,197,94,0.15)"
     else:

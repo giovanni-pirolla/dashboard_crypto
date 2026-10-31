@@ -22,8 +22,8 @@ ANALISE_VOLUME_RELATIVO = {
     },
     "Baixo": {
         "icon": ":material/call_received:",
-        "color": "orange",
-        "background": "orange",
+        "color": "red",
+        "background": "red",
         "label": "Baixo"
     },
     "Muito Baixo": {
@@ -71,8 +71,8 @@ ANALISE_MA = {
     },
     "Abaixo": {
         "icon": ":material/call_received:",
-        "color": "orange",
-        "background": "orange",
+        "color": "red",
+        "background": "red",
         "label": "Abaixo"
     },
     "Muito Abaixo": {
