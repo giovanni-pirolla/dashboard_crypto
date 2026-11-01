@@ -11,7 +11,7 @@
 ![Plotly](https://img.shields.io/badge/Plotly-6.7.0-3F4F75?logo=plotly&logoColor=white)
 ![CoinGecko](https://img.shields.io/badge/API-CoinGecko-8DC63F?logo=coingecko&logoColor=white)
 
-[Demo online](https://SEU-APP.streamlit.app) · [Instalação](#como-instalar-e-rodar) · [Métricas](#métricas-calculadas) · [Limites da API](#api-limites-de-requisições-e-cache)
+[Instalação](#como-instalar-e-rodar) · [Métricas](#métricas-calculadas) · [Limites da API](#api-limites-de-requisições-e-cache)
 
 </div>
 
@@ -23,7 +23,6 @@
 - [Demonstração](#demonstração)
 - [Funcionalidades](#funcionalidades)
 - [Tecnologias utilizadas](#tecnologias-utilizadas)
-- [Arquitetura e estrutura do projeto](#arquitetura-e-estrutura-do-projeto)
 - [Pré-requisitos](#pré-requisitos)
 - [Como instalar e rodar](#como-instalar-e-rodar)
 - [Como usar](#como-usar)
