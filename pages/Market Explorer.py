@@ -54,7 +54,7 @@ with filtros:
         NUMERO_MOEDAS = st.number_input(
             "Número de CriptoMoedas a serem exibidas",
             min_value=1,
-            max_value=100,
+            max_value=1000,
             value=10,
             step=1
         )
