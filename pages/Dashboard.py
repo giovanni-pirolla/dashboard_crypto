@@ -29,7 +29,7 @@ carregar_fontes()
 
 st.set_page_config(layout="wide")
 
-st.markdown("# Dashboard de Análise de Criptomoedas")
+st.markdown("# :material/dashboard: Dashboard de Análise de Criptomoedas")
 st.space()
 
 # Configurações do modo 24h
@@ -233,12 +233,12 @@ with col_tabela:
     df_tabela = todos_dados_mercado.copy()
 
     df_tabela = df_tabela[
-        ["image", "symbol", "current_price", "price_change_percentage_24h"]
+        ["image", "name", "current_price", "price_change_percentage_24h"]
     ]
 
     df_tabela = df_tabela.rename(
         columns={
-            "symbol": "Moeda",
+            "name": "Moeda",
             "current_price": "Preço (USD)",
             "price_change_percentage_24h": "Retorno Diário",
         }
