@@ -309,8 +309,8 @@ Ideias para o futuro do projeto:
 **Giovanni Pirolla**
 
 - GitHub: [@giovanni-pirolla](https://github.com/giovanni-pirolla)
-- LinkedIn: [seu-perfil](www.linkedin.com/in/giovannippirolla)
-- E-mail: giovannippirolla@gmail.com
+- LinkedIn: [giovannippirolla](https://www.linkedin.com/in/giovannippirolla)
+- E-mail: [giovannippirolla@gmail.com](mailto:giovannippirolla@gmail.com)
 
 ---
 
